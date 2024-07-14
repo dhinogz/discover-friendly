@@ -1,0 +1,90 @@
+package components
+
+import "fmt"
+import "github.com/dhinogz/spotify-test/components/shared"
+
+templ Progress(perc, size float64) {
+	<svg class="me-1" id="rad" width={ fmt.Sprintf("%.fpx", size) } height={ fmt.Sprintf("%.fpx", size) } viewBox={ fmt.Sprintf("0 0 %.f %.f", size, size) } version="1.1" xmlns="http://www.w3.org/2000/svg" style="transform:rotate(-90deg)">
+		<circle
+			r={ fmt.Sprintf("%.2f", size/2-5) }
+			cx={ fmt.Sprintf("%.2f", size/2) }
+			cy={ fmt.Sprintf("%.2f", size/2) }
+			fill="transparent"
+			stroke="oklch(46.14% 0.0216 264.436 / 63.86%)"
+			stroke-width="5"
+		></circle>
+		<circle
+			r={ fmt.Sprintf("%.2f", size/2-5) }
+			cx={ fmt.Sprintf("%.2f", size/2) }
+			cy={ fmt.Sprintf("%.2f", size/2) }
+			fill="transparent"
+			stroke="oklch(0.648 0.15 160)"
+			stroke-width="5"
+			stroke-linecap="round"
+			stroke-dashoffset={ fmt.Sprintf("%.2fpx", 3.14*(size/2-5)*2*(float64((100-perc)/100))) }
+			stroke-dasharray={ fmt.Sprintf("%.2fpx", 2*3.14*(size/2-5)) }
+		></circle>
+	</svg>
+}
+
+templ HomePartial(c shared.Context) {
+	if c.User != nil {
+		<div class="h-full hero bg-base-200">
+			<div class="hero-content text-center">
+				<div class="max-w-lg prose">
+					<h1>Welcome { c.User.GetString("username") }!</h1>
+					<p class="mb-4">Here's the most recent playlist to get you started</p>
+					@PlaylistEmbed2()
+				</div>
+			</div>
+		</div>
+	} else {
+		@Landing()
+	}
+}
+
+templ Home(c shared.Context) {
+	@shared.Base(c, "Home") {
+		@HomePartial(c)
+	}
+}
+
+templ Landing() {
+	<div class="min-h-screen bg-gradient-to-b from-base-300 to-base-100">
+		<div class="container mx-auto px-4 py-16">
+			<div class="text-center mb-16">
+				<h1 class="text-5xl font-bold mb-4 text-primary">Discover Friendly</h1>
+				<p class="text-xl mb-8">Share music with friends, one prompt at a time</p>
+				<a href="/login" class="btn btn-primary btn-lg">Get Started</a>
+			</div>
+			<div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+				<div class="card bg-base-200 shadow-xl">
+					<div class="card-body items-center text-center">
+						<h2 class="card-title text-2xl mb-2">Weekly Prompts</h2>
+						<p>Receive fun and thought-provoking prompts every week</p>
+					</div>
+				</div>
+				<div class="card bg-base-200 shadow-xl">
+					<div class="card-body items-center text-center">
+						<h2 class="card-title text-2xl mb-2">Share with Friends</h2>
+						<p>Create groups and share your musical discoveries</p>
+					</div>
+				</div>
+				<div class="card bg-base-200 shadow-xl">
+					<div class="card-body items-center text-center">
+						<h2 class="card-title text-2xl mb-2">Expand Your Tastes</h2>
+						<p>Discover new music through your friends' recommendations</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+templ PlaylistEmbed2() {
+	<iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/6DsIHDvTHwbPHm3qrad0g7?utm_source=generator&theme=0" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+}
+
+templ PlaylistEmbed() {
+	<iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/6DsIHDvTHwbPHm3qrad0g7?utm_source=generator&theme=0" width="90%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+}
