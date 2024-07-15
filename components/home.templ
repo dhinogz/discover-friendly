@@ -1,14 +1,16 @@
 package components
 
-import "github.com/dhinogz/spotify-test/components/shared"
+import (
+	"github.com/dhinogz/spotify-test/components/shared"
+)
 
 templ HomePartial(c shared.Context) {
 	if c.User != nil {
 		<div class="h-full bg-base-200 flex justify-center">
-			<div class="text-center">
+			<div class="mt-6 text-center">
 				<div class="max-w-lg prose">
 					<h1>Welcome { c.User.GetString("username") }!</h1>
-					@SpotifySearch()
+					<a href="/search" class="btn btn-primary">Search For Songs</a>
 				</div>
 			</div>
 		</div>

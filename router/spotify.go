@@ -11,6 +11,28 @@ import (
 	"github.com/zmb3/spotify/v2"
 )
 
+func (ar *AppRouter) GetSearch(c echo.Context) error {
+	spotifyClient := c.Get("spotifyClient").(*spotify.Client)
+
+	currentlyPlaying, err := spotifyClient.PlayerCurrentlyPlaying(c.Request().Context())
+	if err != nil {
+		return err
+	}
+
+	return components.Render(c, http.StatusOK, components.SearchPage(shared.Context{}, currentlyPlaying))
+}
+
+func (ar *AppRouter) GetCurrentlyPlaying(c echo.Context) error {
+	spotifyClient := c.Get("spotifyClient").(*spotify.Client)
+
+	currentlyPlaying, err := spotifyClient.PlayerCurrentlyPlaying(c.Request().Context())
+	if err != nil {
+		return err
+	}
+
+	return components.Render(c, http.StatusOK, components.CurrentlyPlaying(currentlyPlaying))
+}
+
 func (ar *AppRouter) HandleSpotifySearch(c echo.Context) error {
 	rec := c.Get(apis.ContextAuthRecordKey)
 	if rec == nil {
@@ -55,7 +77,6 @@ func (ar *AppRouter) HandlePlayTrack(c echo.Context) error {
 	}
 
 	return c.String(http.StatusOK, "now playing")
-
 }
 
 // func (ar *AppRouter) HandleSpotifySearch(c echo.Context) error {
