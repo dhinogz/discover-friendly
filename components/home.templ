@@ -1,40 +1,14 @@
 package components
 
-import "fmt"
 import "github.com/dhinogz/spotify-test/components/shared"
-
-templ Progress(perc, size float64) {
-	<svg class="me-1" id="rad" width={ fmt.Sprintf("%.fpx", size) } height={ fmt.Sprintf("%.fpx", size) } viewBox={ fmt.Sprintf("0 0 %.f %.f", size, size) } version="1.1" xmlns="http://www.w3.org/2000/svg" style="transform:rotate(-90deg)">
-		<circle
-			r={ fmt.Sprintf("%.2f", size/2-5) }
-			cx={ fmt.Sprintf("%.2f", size/2) }
-			cy={ fmt.Sprintf("%.2f", size/2) }
-			fill="transparent"
-			stroke="oklch(46.14% 0.0216 264.436 / 63.86%)"
-			stroke-width="5"
-		></circle>
-		<circle
-			r={ fmt.Sprintf("%.2f", size/2-5) }
-			cx={ fmt.Sprintf("%.2f", size/2) }
-			cy={ fmt.Sprintf("%.2f", size/2) }
-			fill="transparent"
-			stroke="oklch(0.648 0.15 160)"
-			stroke-width="5"
-			stroke-linecap="round"
-			stroke-dashoffset={ fmt.Sprintf("%.2fpx", 3.14*(size/2-5)*2*(float64((100-perc)/100))) }
-			stroke-dasharray={ fmt.Sprintf("%.2fpx", 2*3.14*(size/2-5)) }
-		></circle>
-	</svg>
-}
 
 templ HomePartial(c shared.Context) {
 	if c.User != nil {
-		<div class="h-full hero bg-base-200">
-			<div class="hero-content text-center">
+		<div class="h-full bg-base-200 flex justify-center">
+			<div class="text-center">
 				<div class="max-w-lg prose">
 					<h1>Welcome { c.User.GetString("username") }!</h1>
-					<p class="mb-4">Here's the most recent playlist to get you started</p>
-					@PlaylistEmbed2()
+					@SpotifySearch()
 				</div>
 			</div>
 		</div>

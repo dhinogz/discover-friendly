@@ -69,6 +69,11 @@ func (ar *AppRouter) SetupRoutes(live bool) error {
 
 	ar.Router.Use(ar.LoadAuthContextFromCookie())
 	ar.Router.GET("/", ar.GetHome)
+	ar.Router.GET("/search", ar.GetHome, ar.LoadAuthContextFromCookie(), ar.LoadSpotifyAuthMiddleware())
+
+	// Search htmx response
+	ar.Router.POST("/spotify-search", ar.HandleSpotifySearch, ar.LoadAuthContextFromCookie(), ar.LoadSpotifyAuthMiddleware())
+	ar.Router.GET("/tracks/:uri", ar.HandlePlayTrack, ar.LoadAuthContextFromCookie(), ar.LoadSpotifyAuthMiddleware())
 
 	// Auth handlers
 	ar.Router.GET("/login", ar.GetLogin)

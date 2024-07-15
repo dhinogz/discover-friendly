@@ -18,6 +18,7 @@ func (ar *AppRouter) GetHome(c echo.Context) error {
 	}
 
 	user := c.Get(apis.ContextAuthRecordKey).(*pbmodels.Record)
+
 	// lists, err := models.FindUserLists(ar.App.Dao(), user.Id)
 	// if err != nil {
 	// 	ar.App.Logger().Error("unable to get lists for user", "error", err, "id", user.Id)

@@ -1,12 +1,15 @@
 package models
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
 
 	"github.com/pocketbase/dbx"
 	"github.com/pocketbase/pocketbase/daos"
 	"github.com/pocketbase/pocketbase/models"
 	"github.com/pocketbase/pocketbase/tools/types"
+	"golang.org/x/oauth2"
 )
 
 type OAuth struct {
@@ -40,11 +43,18 @@ func OAuthQuery(dao *daos.Dao) *dbx.SelectQuery {
 	return dao.ModelQuery(&OAuth{})
 }
 
+var ErrNoOAuthRows = errors.New("no rows in oauth query")
+
 func GetOAuthByUserId(dao *daos.Dao, userId, provider string) (*OAuth, error) {
 	o := &OAuth{}
 	oq := dao.ModelQuery(o)
 
 	if err := oq.AndWhere(dbx.HashExp{"user": userId, "provider": provider}).Limit(1).One(o); err != nil {
+		if err == sql.ErrNoRows {
+			o.UserId = userId
+			o.Provider = provider
+			return o, ErrNoOAuthRows
+		}
 		return nil, fmt.Errorf("db query oauth (%s): %w", userId, err)
 	}
 
@@ -59,5 +69,28 @@ func DeleteOAuthByUserId(dao *daos.Dao, userId, provider string) error {
 	if err := dao.Delete(o); err != nil {
 		return err
 	}
+	return nil
+}
+
+func (o *OAuth) UpdateOAuth(dao *daos.Dao, token *oauth2.Token) error {
+	// o := &OAuth{}
+	// oq := dao.ModelQuery(o)
+	//
+	// if err := oq.AndWhere(dbx.HashExp{"user": userId, "provider": provider}).Limit(1).One(o); err != nil {
+	// 	return fmt.Errorf("db query oauth (%s): %w", userId, err)
+	// }
+
+	o.AccessToken = token.AccessToken
+	o.RefreshToken = token.RefreshToken
+	o.TokenType = token.TokenType
+
+	expiry := types.DateTime{}
+	expiry.Scan(token.Expiry)
+	o.Expiry = expiry
+
+	if err := dao.Save(o); err != nil {
+		return fmt.Errorf("update oauth (%s): %w", o.Id, err)
+	}
+
 	return nil
 }

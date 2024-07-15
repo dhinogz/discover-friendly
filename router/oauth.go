@@ -9,7 +9,6 @@ import (
 	"github.com/dhinogz/spotify-test/models"
 	"github.com/gorilla/csrf"
 	"github.com/labstack/echo/v5"
-	"github.com/pocketbase/pocketbase/tools/types"
 	"github.com/zmb3/spotify/v2"
 	spotifyauth "github.com/zmb3/spotify/v2/auth"
 )
@@ -49,6 +48,23 @@ func (ar *AppRouter) HandleOAuthCallback(c echo.Context) error {
 		return err
 	}
 
+	tracks, err := spotifyClient.CurrentUsersTopTracks(c.Request().Context(), spotify.Limit(5))
+	if err != nil {
+		slog.Error("could not get current users top tracks", "err", err)
+		return err
+	}
+	seeds := spotify.Seeds{}
+	for _, t := range tracks.Tracks {
+		seeds.Tracks = append(seeds.Tracks, t.ID)
+	}
+
+	rec, err := spotifyClient.GetRecommendations(c.Request().Context(), seeds, nil)
+	if err != nil {
+		slog.Error("could not get recommendations", "err", err)
+		return err
+	}
+	slog.Info("recs", "r", rec)
+
 	user, err := ar.App.Dao().FindAuthRecordByEmail("users", currentSpotifyUser.Email)
 	if err != nil {
 		user, err = models.CreateUser(ar.App.Dao(), currentSpotifyUser.Email, currentSpotifyUser.DisplayName)
@@ -63,22 +79,35 @@ func (ar *AppRouter) HandleOAuthCallback(c echo.Context) error {
 		return err
 	}
 
-	expiry := types.DateTime{}
-	expiry.Scan(token.Expiry)
-
-	userOAuth := models.OAuth{
-		Provider:     "spotify",
-		AccessToken:  token.AccessToken,
-		RefreshToken: token.RefreshToken,
-		TokenType:    token.TokenType,
-		Expiry:       expiry,
-		UserId:       user.Id,
+	oauth, err := models.GetOAuthByUserId(ar.App.Dao(), user.Id, "spotify")
+	if err != nil {
+		if err == models.ErrNoOAuthRows {
+			slog.Info("no rows", "o", oauth)
+		}
 	}
+	slog.Info("oauth update", "o", oauth)
 
-	err = userOAuth.Save(ar.App.Dao())
+	// expiry := types.DateTime{}
+	// expiry.Scan(token.Expiry)
+	//
+	// userOAuth := models.OAuth{
+	// 	Provider:     "spotify",
+	// 	AccessToken:  token.AccessToken,
+	// 	RefreshToken: token.RefreshToken,
+	// 	TokenType:    token.TokenType,
+	// 	Expiry:       expiry,
+	// 	UserId:       user.Id,
+	// }
+
+	err = oauth.UpdateOAuth(ar.App.Dao(), token)
 	if err != nil {
 		return err
 	}
+
+	// err = oauth.Save(ar.App.Dao())
+	// if err != nil {
+	// 	return err
+	// }
 
 	return c.Redirect(http.StatusFound, "/")
 }
