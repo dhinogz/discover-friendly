@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/joho/godotenv"
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/core"
 	"github.com/pocketbase/pocketbase/plugins/migratecmd"
@@ -22,10 +23,13 @@ func main() {
 	})
 
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
-		// if err := godotenv.Load(); err != nil {
-		// 	slog.Error("could not load env", "err", err)
-		// 	return err
-		// }
+		currentEnv := os.Getenv("ENV")
+		if currentEnv == "dev" {
+			if err := godotenv.Load(); err != nil {
+				e.App.Logger().Error("could not load env", "err", err)
+				return err
+			}
+		}
 
 		return router.NewAppRouter(e).SetupRoutes(isGoRun)
 	})
