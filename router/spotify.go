@@ -8,10 +8,18 @@ import (
 	"github.com/dhinogz/spotify-test/components/shared"
 	"github.com/labstack/echo/v5"
 	"github.com/pocketbase/pocketbase/apis"
+	pbmodels "github.com/pocketbase/pocketbase/models"
 	"github.com/zmb3/spotify/v2"
 )
 
 func (ar *AppRouter) GetSearch(c echo.Context) error {
+	rec := c.Get(apis.ContextAuthRecordKey)
+	if rec == nil {
+		return components.Render(c, http.StatusOK, components.Home(shared.Context{}))
+	}
+
+	user := c.Get(apis.ContextAuthRecordKey).(*pbmodels.Record)
+
 	spotifyClient := c.Get("spotifyClient").(*spotify.Client)
 
 	currentlyPlaying, err := spotifyClient.PlayerCurrentlyPlaying(c.Request().Context())
@@ -19,10 +27,10 @@ func (ar *AppRouter) GetSearch(c echo.Context) error {
 		return err
 	}
 
-	return components.Render(c, http.StatusOK, components.SearchPage(shared.Context{}, currentlyPlaying))
+	return components.Render(c, http.StatusOK, components.SearchPage(shared.Context{User: user}, currentlyPlaying))
 }
 
-func (ar *AppRouter) GetCurrentlyPlaying(c echo.Context) error {
+func (ar *AppRouter) HandleCurrentlyPlaying(c echo.Context) error {
 	spotifyClient := c.Get("spotifyClient").(*spotify.Client)
 
 	currentlyPlaying, err := spotifyClient.PlayerCurrentlyPlaying(c.Request().Context())
