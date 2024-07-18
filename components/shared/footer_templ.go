@@ -28,15 +28,15 @@ func Footer() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<footer class=\"footer items-center gap-2 p-4 bg-base-100\"><aside class=\"items-center grid-flow-col\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<footer class=\"footer items-center gap-2 p-4 bg-base-100\"><aside class=\"items-center grid-flow-col\"><a href=\"https://github.com/dhinogz/discover-friendly\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = icons.App().Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = icons.Github().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<p>Copyright © 2024 - David Hinojosa</p></aside></footer>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a><p>Copyright © 2024 - David Hinojosa</p></aside></footer>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

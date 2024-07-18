@@ -25,7 +25,7 @@ templ CurrentlyPlaying(curr *spotify.CurrentlyPlaying) {
 	<div
 		id="currently-playing"
 		hx-get="/tracks/current"
-		hx-trigger="every 2s"
+		hx-trigger="every 3s"
 		hx-swap="outerHTML"
 	>
 		if !curr.Playing {
