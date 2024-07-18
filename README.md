@@ -1,4 +1,4 @@
-## Discover Friendlt
+## Discover Friendly
 
 ### Requirements
 - Go
