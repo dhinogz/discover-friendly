@@ -1,4 +1,4 @@
-module github.com/dhinogz/spotify-test
+module github.com/dhinogz/discover-friendly
 
 go 1.22.2
 

@@ -1,0 +1,99 @@
+package components
+
+import (
+	"github.com/dhinogz/discover-friendly/internal/components/shared"
+	"github.com/zmb3/spotify/v2"
+	"fmt"
+)
+
+templ SearchPage(c shared.Context, curr *spotify.CurrentlyPlaying) {
+	@shared.Base(c, "Home") {
+		<div class="h-full bg-base-200 flex justify-center">
+			<div class="mt-6 text-center">
+				<div class="max-w-lg prose">
+					<div class="container mx-auto bg-base-200">
+						@CurrentlyPlaying(curr)
+						@SpotifySearch()
+					</div>
+				</div>
+			</div>
+		</div>
+	}
+}
+
+templ CurrentlyPlaying(curr *spotify.CurrentlyPlaying) {
+	<div
+		id="currently-playing"
+		hx-get="/tracks/current"
+		hx-trigger="every 3s"
+		hx-swap="outerHTML"
+	>
+		if !curr.Playing {
+			Not Playing Anything
+		} else {
+			<button class="hover:bg-base-100 bg-base-200 cursor-pointer rounded-md transition-colors duration-200 p-2 w-full border">
+				<div
+					class="flex justify-start space-x-3"
+				>
+					<img
+						src={ string(templ.URL(curr.Item.Album.Images[0].URL)) }
+						alt={ curr.Item.Name + " album cover" }
+						class="w-28 ml-4 object-cover rounded-md"
+					/>
+					<div class="flex flex-col items-start justify-start space-y-1">
+						<p class="text-lg text-base-content font-bold text-wrap">{ curr.Item.Name }</p>
+						<p class="text-md text-base-content font-semibold truncate">{ curr.Item.Artists[0].Name }</p>
+					</div>
+				</div>
+			</button>
+		}
+	</div>
+}
+
+templ SpotifySearch() {
+	<h3 class="text-2xl font-bold mb-4 flex items-center">
+		Spotify Search
+		<span class="htmx-indicator ml-2">
+			<span class="loading loading-spinner loading-sm"></span> Searching...
+		</span>
+	</h3>
+	<div class="form-control">
+		<input
+			id="search-input"
+			type="search"
+			placeholder="Search for songs..."
+			name="query"
+			class="input input-bordered w-full"
+			hx-post="/spotify-search"
+			hx-trigger="input changed delay:500ms, search"
+			hx-target="#search-results"
+			hx-indicator=".htmx-indicator"
+		/>
+	</div>
+	<div id="search-results" class="mt-4 space-y-4 flex flex-col items-start"></div>
+	<div id="search-selected" class="mt-4 space-y-4"></div>
+}
+
+templ SpotifySearchResults(ts []spotify.FullTrack) {
+	for _, t := range ts {
+		<button class="hover:bg-base-100 bg-base-200 cursor-pointer rounded-md transition-colors duration-200 w-full p-2 border">
+			<div
+				class="flex justify-start space-x-3"
+				hx-get={ string(templ.URL(fmt.Sprintf("/tracks/%s", string(t.URI)))) }
+				hx-target="#search-selected"
+				hx-swap="none"
+				hx-on::after-request="document.getElementById('search-input').value = ''"
+			>
+				<img
+					src={ string(templ.URL(t.Album.Images[0].URL)) }
+					alt={ t.Name + " album cover" }
+					class="w-14 ml-4 object-cover rounded-md"
+				/>
+				<div class="flex flex-col items-start justify-start space-y-1">
+					<p class="text-lg text-base-content font-bold text-pretty">{ t.Name }</p>
+					<p class="text-md text-base-content font-semibold truncate">{ t.Artists[0].Name }</p>
+				</div>
+			</div>
+		</button>
+	}
+}

@@ -1,0 +1,25 @@
+package auth
+
+import (
+	"github.com/dhinogz/discover-friendly/internal/components/shared"
+	"github.com/dhinogz/discover-friendly/internal/components/icons"
+)
+
+templ LoginPage(c shared.Context) {
+	@shared.Base(c, "Login") {
+		<div class="h-full flex items-center justify-center bg-base-200">
+			<div class="card w-96 shadow-xl">
+				<div class="card-body items-center text-center">
+					<h1 class="card-title text-4xl mb-4">Welcome!</h1>
+					<p class="mb-6">Log in to access your account</p>
+					<div class="card-actions">
+						<a href="/oauth/spotify/connect" class="btn btn-success btn-wide">
+							@icons.Spotify()
+							Login with Spotify
+						</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	}
+}

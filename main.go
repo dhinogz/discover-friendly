@@ -10,8 +10,8 @@ import (
 	"github.com/pocketbase/pocketbase/core"
 	"github.com/pocketbase/pocketbase/plugins/migratecmd"
 
-	_ "github.com/dhinogz/spotify-test/migrations"
-	"github.com/dhinogz/spotify-test/router"
+	"github.com/dhinogz/discover-friendly/internal/handlers"
+	_ "github.com/dhinogz/discover-friendly/migrations"
 )
 
 func main() {
@@ -31,7 +31,7 @@ func main() {
 			}
 		}
 
-		return router.NewAppRouter(e).SetupRoutes(isGoRun)
+		return handlers.NewAppRouter(e).SetupRoutes(isGoRun)
 	})
 
 	if err := app.Start(); err != nil {
