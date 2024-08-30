@@ -1,33 +1,45 @@
-# Stage 1: Install templ and generate templ go files
-FROM golang:alpine AS templ-generator
-WORKDIR /app
-RUN apk add --no-cache git
-RUN go install github.com/a-h/templ/cmd/templ@latest
-COPY . .
-RUN templ generate
+FROM node:20-slim as node
 
-# Stage 2: Build CSS
-FROM node:20-alpine AS css-builder
-WORKDIR /app
-COPY package.json package-lock.json ./
-RUN npm ci
-COPY --from=templ-generator /app ./
-RUN npx tailwindcss -m -i ./assets/tailwind.css -o ./assets/dist/styles.min.css
+# 1. Builder step builds tailwindcss styles, templ templates, and Go binary
+FROM golang:1.23-bookworm as builder
 
-# Stage 3: Build the Go application
-FROM golang:alpine AS go-builder
+# Copy node dependencies from base node image
+COPY --from=node /usr/local/bin/node /usr/local/bin/node
+COPY --from=node /usr/local/include/node /usr/local/include/node
+COPY --from=node /usr/local/lib/node_modules /usr/local/lib/node_modules
+COPY --from=node /opt/yarn-v*/bin/* /usr/local/bin/
+COPY --from=node /opt/yarn-v*/lib/* /usr/local/lib/
+RUN ln -vs /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
+    && ln -vs /usr/local/lib/node_modules/npm/bin/npx-cli.js /usr/local/bin/npx
+
 WORKDIR /app
-RUN apk add --no-cache git
+
+# Install node deps (tailwindcss)
+COPY package-lock.json package.json ./
+RUN npm ci 
+
+# Install Go dependencies and templ
 COPY go.mod go.sum ./
 RUN go mod download
 RUN go mod verify
-COPY --from=templ-generator /app ./
-COPY --from=css-builder /app/assets/dist ./assets/dist
-RUN go generate ./...
-RUN go build -ldflags="-s -w" -o ptht
+RUN go install github.com/a-h/templ/cmd/templ@latest
 
-# Stage 4: Final stage
-FROM gcr.io/distroless/static
-COPY --from=go-builder /app/ptht /ptht
+# Generate templ, build CSS and embed assets
+COPY . .
+RUN templ generate
+RUN npx tailwindcss -m -i ./assets/tailwind.css -o ./assets/dist/styles.min.css
+RUN go generate ./...
+
+# Build binary
+ENV CGO_ENABLED=0
+RUN go build -ldflags="-s -w" -o web 
+
+# 2. Serve step
+FROM debian:12-slim
+
+WORKDIR /app
+
+COPY --from=builder /app/web /app/web
+
 EXPOSE 8090
-ENTRYPOINT ["/ptht", "serve", "--http=0.0.0.0:8090"]
+ENTRYPOINT ["/app/web", "serve", "--http=0.0.0.0:8090"]
