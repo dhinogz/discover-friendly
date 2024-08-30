@@ -1,11 +1,11 @@
-package htmx
+package handlers
 
 import (
 	"net/http"
 	"strings"
 
-	"github.com/dhinogz/discover-friendly/internal/components"
-	"github.com/dhinogz/discover-friendly/internal/components/shared"
+	"github.com/dhinogz/discover-friendly/internal/ui"
+	"github.com/dhinogz/discover-friendly/internal/ui/shared"
 	"github.com/labstack/echo/v5"
 )
 
@@ -16,7 +16,7 @@ func IsHtmxRequest(c echo.Context) bool {
 }
 
 // Redirect handles redirection properly for HTMX.
-func Redirect(c echo.Context, path string) error {
+func htmxRedirect(c echo.Context, path string) error {
 	if IsHtmxRequest(c) {
 		c.Response().Header().Set("HX-Location", path)
 		return c.NoContent(204)
@@ -36,7 +36,7 @@ func WrapDefaultErrorHandler(defaultErrorHandler echo.HTTPErrorHandler) echo.HTT
 				code = he.Code
 			}
 
-			components.Render(c, code, components.HTTPError(shared.Context{}, code, "", IsHtmxRequest(c))) //nolint:errcheck
+			ui.Render(c, code, ui.HTTPError(shared.Context{}, code, "", IsHtmxRequest(c))) //nolint:errcheck
 		} else {
 			defaultErrorHandler(c, err)
 		}
@@ -47,12 +47,12 @@ func WrapDefaultErrorHandler(defaultErrorHandler echo.HTTPErrorHandler) echo.HTT
 // invisible placeholder already present in the page.
 func Error(c echo.Context, message string) error {
 	c.Response().Header().Set("HX-Retarget", "#"+shared.ToastId)
-	return components.Render(c, http.StatusOK, shared.ErrorToast(message))
+	return ui.Render(c, http.StatusOK, shared.ErrorToast(message))
 }
 
 // Info will retarget HTMX with the appropriate header so it uses the
 // invisible placeholder already present in the page.
 func Info(c echo.Context, message string) error {
 	c.Response().Header().Set("HX-Retarget", "#"+shared.ToastId)
-	return components.Render(c, http.StatusOK, shared.InfoToast(message))
+	return ui.Render(c, http.StatusOK, shared.InfoToast(message))
 }

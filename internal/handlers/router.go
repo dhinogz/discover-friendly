@@ -10,7 +10,6 @@ import (
 	"golang.org/x/oauth2"
 
 	"github.com/dhinogz/discover-friendly/assets"
-	"github.com/dhinogz/discover-friendly/internal/htmx"
 )
 
 type OAuthSettings struct {
@@ -64,12 +63,14 @@ func NewAppRouter(e *core.ServeEvent) *AppRouter {
 
 func (ar *AppRouter) SetupRoutes(live bool) error {
 	ar.Router.Use(middleware.Logger())
-	ar.Router.HTTPErrorHandler = htmx.WrapDefaultErrorHandler(ar.Router.HTTPErrorHandler)
+	ar.Router.HTTPErrorHandler = WrapDefaultErrorHandler(ar.Router.HTTPErrorHandler)
 	ar.Router.GET("/static/*", assets.AssetsHandler(ar.App.Logger(), live), middleware.Gzip())
 
 	ar.Router.Use(ar.LoadAuthContextFromCookie())
 	ar.Router.GET("/", ar.GetHome)
+	// TODO: wrap in shared router group
 	ar.Router.GET("/search", ar.GetSearch, ar.LoadAuthContextFromCookie(), ar.LoadSpotifyAuthMiddleware())
+	ar.Router.GET("/playlist-prompt", ar.HandleNewPlaylistPrompt, ar.LoadAuthContextFromCookie(), ar.LoadSpotifyAuthMiddleware())
 
 	// Search htmx response
 	ar.Router.POST("/spotify-search", ar.HandleSpotifySearch, ar.LoadAuthContextFromCookie(), ar.LoadSpotifyAuthMiddleware())

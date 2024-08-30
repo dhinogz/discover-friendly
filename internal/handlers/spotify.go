@@ -4,8 +4,8 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/dhinogz/discover-friendly/internal/components"
-	"github.com/dhinogz/discover-friendly/internal/components/shared"
+	"github.com/dhinogz/discover-friendly/internal/ui"
+	"github.com/dhinogz/discover-friendly/internal/ui/shared"
 	"github.com/labstack/echo/v5"
 	"github.com/pocketbase/pocketbase/apis"
 	pbmodels "github.com/pocketbase/pocketbase/models"
@@ -15,7 +15,7 @@ import (
 func (ar *AppRouter) GetSearch(c echo.Context) error {
 	rec := c.Get(apis.ContextAuthRecordKey)
 	if rec == nil {
-		return components.Render(c, http.StatusOK, components.Home(shared.Context{}))
+		return ui.Render(c, http.StatusOK, ui.Home(shared.Context{}))
 	}
 
 	user := c.Get(apis.ContextAuthRecordKey).(*pbmodels.Record)
@@ -27,7 +27,7 @@ func (ar *AppRouter) GetSearch(c echo.Context) error {
 		return err
 	}
 
-	return components.Render(c, http.StatusOK, components.SearchPage(shared.Context{User: user}, currentlyPlaying))
+	return ui.Render(c, http.StatusOK, ui.SearchPage(shared.Context{User: user}, currentlyPlaying))
 }
 
 func (ar *AppRouter) HandleCurrentlyPlaying(c echo.Context) error {
@@ -38,13 +38,13 @@ func (ar *AppRouter) HandleCurrentlyPlaying(c echo.Context) error {
 		return err
 	}
 
-	return components.Render(c, http.StatusOK, components.CurrentlyPlaying(currentlyPlaying))
+	return ui.Render(c, http.StatusOK, ui.CurrentlyPlaying(currentlyPlaying))
 }
 
 func (ar *AppRouter) HandleSpotifySearch(c echo.Context) error {
 	rec := c.Get(apis.ContextAuthRecordKey)
 	if rec == nil {
-		return components.Render(c, http.StatusOK, components.Home(shared.Context{}))
+		return ui.Render(c, http.StatusOK, ui.Home(shared.Context{}))
 	}
 
 	spotifyClient := c.Get("spotifyClient").(*spotify.Client)
@@ -58,17 +58,17 @@ func (ar *AppRouter) HandleSpotifySearch(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	return components.Render(
+	return ui.Render(
 		c,
 		http.StatusOK,
-		components.SpotifySearchResults(searchRes.Tracks.Tracks),
+		ui.SpotifySearchResults(searchRes.Tracks.Tracks),
 	)
 }
 
 func (ar *AppRouter) HandlePlayTrack(c echo.Context) error {
 	rec := c.Get(apis.ContextAuthRecordKey)
 	if rec == nil {
-		return components.Render(c, http.StatusOK, components.Home(shared.Context{}))
+		return ui.Render(c, http.StatusOK, ui.Home(shared.Context{}))
 	}
 
 	spotifyClient := c.Get("spotifyClient").(*spotify.Client)

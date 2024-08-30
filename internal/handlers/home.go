@@ -7,14 +7,14 @@ import (
 	"github.com/pocketbase/pocketbase/apis"
 	pbmodels "github.com/pocketbase/pocketbase/models"
 
-	"github.com/dhinogz/discover-friendly/internal/components"
-	"github.com/dhinogz/discover-friendly/internal/components/shared"
+	"github.com/dhinogz/discover-friendly/internal/ui"
+	"github.com/dhinogz/discover-friendly/internal/ui/shared"
 )
 
 func (ar *AppRouter) GetHome(c echo.Context) error {
 	rec := c.Get(apis.ContextAuthRecordKey)
 	if rec == nil {
-		return components.Render(c, http.StatusOK, components.Home(shared.Context{}))
+		return ui.Render(c, http.StatusOK, ui.Home(shared.Context{}))
 	}
 
 	user := c.Get(apis.ContextAuthRecordKey).(*pbmodels.Record)
@@ -25,5 +25,5 @@ func (ar *AppRouter) GetHome(c echo.Context) error {
 	// 	return htmx.Error(c, "Unable to get lists")
 	// }
 
-	return components.Render(c, http.StatusOK, components.Home(shared.Context{User: user}))
+	return ui.Render(c, http.StatusOK, ui.Home(shared.Context{User: user}))
 }

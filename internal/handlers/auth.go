@@ -1,17 +1,46 @@
 package handlers
 
 import (
-	"fmt"
-	"log/slog"
 	"net/http"
+
+	"github.com/labstack/echo/v5"
+	"github.com/pocketbase/pocketbase/apis"
+
+	"fmt"
+	"github.com/dhinogz/discover-friendly/internal/ui"
+	"github.com/dhinogz/discover-friendly/internal/ui/auth"
+	"github.com/dhinogz/discover-friendly/internal/ui/shared"
+	"log/slog"
 	"time"
 
 	"github.com/dhinogz/discover-friendly/internal/models"
 	"github.com/gorilla/csrf"
-	"github.com/labstack/echo/v5"
 	"github.com/zmb3/spotify/v2"
 	spotifyauth "github.com/zmb3/spotify/v2/auth"
 )
+
+// GetLogin returns the login page.
+func (ar *AppRouter) GetLogin(c echo.Context) error {
+	if c.Get(apis.ContextAuthRecordKey) != nil {
+		return c.Redirect(302, "/")
+	}
+
+	return ui.Render(c, http.StatusOK, auth.LoginPage(shared.Context{}))
+}
+
+// PostLogout logs the user out by clearing the authentication cookie.
+func (ar *AppRouter) PostLogout(c echo.Context) error {
+	c.SetCookie(&http.Cookie{
+		Name:     AuthCookieName,
+		Value:    "",
+		Path:     "/",
+		Secure:   true,
+		HttpOnly: true,
+		MaxAge:   -1,
+	})
+
+	return htmxRedirect(c, "/")
+}
 
 func (ar *AppRouter) HandleOAuthConnect(c echo.Context) error {
 	state := csrf.Token(c.Request())

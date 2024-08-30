@@ -24,7 +24,6 @@ type OAuth struct {
 
 	// Relations
 	UserId string `db:"user"`
-	// User   *User  `db:"-"`
 }
 
 func (o *OAuth) Save(dao *daos.Dao) error {
@@ -73,13 +72,6 @@ func DeleteOAuthByUserId(dao *daos.Dao, userId, provider string) error {
 }
 
 func (o *OAuth) UpdateOAuth(dao *daos.Dao, token *oauth2.Token) error {
-	// o := &OAuth{}
-	// oq := dao.ModelQuery(o)
-	//
-	// if err := oq.AndWhere(dbx.HashExp{"user": userId, "provider": provider}).Limit(1).One(o); err != nil {
-	// 	return fmt.Errorf("db query oauth (%s): %w", userId, err)
-	// }
-
 	o.AccessToken = token.AccessToken
 	o.RefreshToken = token.RefreshToken
 	o.TokenType = token.TokenType
