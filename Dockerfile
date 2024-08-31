@@ -42,4 +42,4 @@ WORKDIR /app
 COPY --from=builder /app/web /app/web
 
 EXPOSE 8090
-ENTRYPOINT ["/app/web", "serve", "--http=0.0.0.0:8090"]
+ENTRYPOINT ["/app/web", "serve"]
